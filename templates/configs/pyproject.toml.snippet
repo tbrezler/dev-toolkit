@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 120
+target-version = ['py312']
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+select = ["E", "F", "W", "I", "UP", "N", "C4", "BLE", "A"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

@@ -1,0 +1,76 @@
+{
+    // ============================================================
+    // PYTHON - Interpreter & Environment
+    // ============================================================
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+
+    // ============================================================
+    // PYTHON - Testing
+    // ============================================================
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+
+    // ============================================================
+    // PYTHON - Formatting & Linting
+    // ============================================================
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "black-formatter.args": ["--line-length", "120"],
+    "isort.args": ["--profile", "black"],
+
+    // ============================================================
+    // FILES - Exclusions & Cleanup
+    // ============================================================
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true,
+        ".coverage": true,
+        ".venv": true,
+        ".aws-sam": true,
+        ".DS_Store": true,
+        "build/": true,
+        "dist/": true
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+
+    // ============================================================
+    // SEARCH - Exclusions
+    // ============================================================
+    "search.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true,
+        ".coverage": true,
+        ".venv": true,
+        ".aws-sam": true,
+        "build/": true,
+        "dist/": true,
+        ".DS_Store": true
+    },
+
+    // ============================================================
+    // MARKDOWN - Documentation
+    // ============================================================
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.rulers": [100]
+    },
+
+    // ============================================================
+    // EDITOR - General & Other Formatters
+    // ============================================================
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
