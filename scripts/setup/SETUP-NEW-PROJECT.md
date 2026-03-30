@@ -18,30 +18,30 @@ It follows your project checklist and configures your project with all templates
 ### 1. Clone your dev-toolkit (if you haven't already)
 
 ```bash
-git clone https://github.com/your-username/dev-toolkit.git ~/dev-toolkit
+git clone https://github.com/your-username/dev-toolkit.git ~/repos/dev-toolkit
 ```
 
 (Adjust the path if you store it elsewhere.)
 
 ### 2. The script is already executable
 
-The script lives at: `~/dev-toolkit/scripts/setup/setup-new-project.sh`
+The script lives at: `~/repos/dev-toolkit/scripts/setup/setup-new-project.sh`
 
 ### 3. Update the TOOLKIT_DIR path (ONE TIME SETUP)
 
 Open the script:
 ```bash
-vim ~/dev-toolkit/scripts/setup/setup-new-project.sh
+vim ~/repos/dev-toolkit/scripts/setup/setup-new-project.sh
 ```
 
 Find this line near the top:
 ```bash
-TOOLKIT_DIR="$HOME/path/to/your/dev-toolkit"
+TOOLKIT_DIR="$HOME/repos/dev-toolkit"
 ```
 
 Replace it with your actual toolkit path. Example:
 ```bash
-TOOLKIT_DIR="$HOME/dev-toolkit"
+TOOLKIT_DIR="$HOME/repos/dev-toolkit"
 ```
 
 Save and exit. You only need to do this once.
@@ -53,12 +53,12 @@ Save and exit. You only need to do this once.
 Run the script with a project directory path:
 
 ```bash
-~/dev-toolkit/scripts/setup/setup-new-project.sh ~/repos/my-new-project
+~/repos/dev-toolkit/scripts/setup/setup-new-project.sh ~/repos/my-new-project
 ```
 
 Or create an alias for easier access:
 ```bash
-alias setup-project='~/dev-toolkit/scripts/setup/setup-new-project.sh'
+alias setup-project='~/repos/dev-toolkit/scripts/setup/setup-new-project.sh'
 ```
 
 Then:
