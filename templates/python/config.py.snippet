@@ -1,0 +1,15 @@
+"""Application configuration.
+
+Copy this to your project as config.py and customize.
+"""
+
+from pathlib import Path
+import pytz
+
+# Project paths
+ROOT_DIR = Path(__file__).parent.parent
+DATA_DIR = ROOT_DIR / "data"
+LOGS_DIR = ROOT_DIR / "logs"
+
+# Timezone for all logging and timestamps
+LOCAL_TZ = pytz.timezone("America/Chicago")  # Change to your timezone

@@ -12,6 +12,7 @@ Personal developer toolkit for Python projects, data engineering, and BI work. I
 - **[Git/GitHub](docs/quick-reference/GIT-GITHUB-QUICK-REFERENCE.md)** – Common Git commands, workflows, fixing mistakes
 - **[VS Code](docs/quick-reference/VSCODE-QUICK-REFERENCE.md)** – Shortcuts, debugging, extensions
 - **[Python/pip/pyproject.toml](docs/quick-reference/PYTHON-PIP-PYPROJECT-QUICK-REFERENCE.md)** – Virtual environments, dependencies, version management
+- **[Logging](docs/quick-reference/LOGGING-QUICK-REFERENCE.md)** – Standard logging with timezone support, optional JSON
 - **[AWS CLI](docs/quick-reference/AWS-CLI-QUICK-REFERENCE.md)** – S3, Lambda, RDS, CloudWatch, EC2, and more
 - **[DBeaver](docs/quick-reference/DBEAVER-QUICK-REFERENCE.md)** – SQL IDE shortcuts, queries, exports
 
@@ -24,6 +25,12 @@ Personal developer toolkit for Python projects, data engineering, and BI work. I
 - `.editorconfig` – Editor configuration (formatting across file types)
 - `.pre-commit-config.yaml` – Pre-commit hooks (Black, Ruff, mypy)
 - `pyproject.toml.snippet` – Python project configuration snippet
+
+**Python Logging:**
+- `logging_config.py` – Standard logging with timezone, file rotation, optional JSON
+- `audit_logging.py` – Database audit logging (optional, for future use)
+- `config.py.snippet` – Template with LOCAL_TZ configuration
+- `constants.py.snippet` – Template with logging constants
 
 **SQL:**
 - `ORACLE-PLSQL-TEMPLATE.sql` – Oracle SQL query template
@@ -39,7 +46,13 @@ Personal developer toolkit for Python projects, data engineering, and BI work. I
 ### Scripts
 
 **Project Automation:**
-- `setup-new-project.sh` – Automate new project initialization (copies templates, creates venv, installs pre-commit)
+- `setup-new-project.sh` – Automate new project initialization
+  - ✓ Creates src, tests, logs directories
+  - ✓ Copies config templates (.vscode, .gitignore, .env.example, .editorconfig, .pre-commit-config.yaml)
+  - ✓ Copies Python logging, config, and constants templates
+  - ✓ Creates venv
+  - ✓ Installs dependencies
+  - ✓ Installs pre-commit hooks
 
 ---
 
@@ -54,6 +67,7 @@ dev-toolkit/
 │       ├── GIT-GITHUB-QUICK-REFERENCE.md
 │       ├── VSCODE-QUICK-REFERENCE.md
 │       ├── PYTHON-PIP-PYPROJECT-QUICK-REFERENCE.md
+│       ├── LOGGING-QUICK-REFERENCE.md
 │       ├── AWS-CLI-QUICK-REFERENCE.md
 │       └── DBEAVER-QUICK-REFERENCE.md
 ├── templates/
@@ -64,11 +78,16 @@ dev-toolkit/
 │   │   ├── .editorconfig
 │   │   ├── .pre-commit-config.yaml
 │   │   └── pyproject.toml.snippet
+│   ├── python/
+│   │   ├── logging_config.py
+│   │   ├── audit_logging.py
+│   │   ├── config.py.snippet
+│   │   └── constants.py.snippet
 │   ├── sql/
 │   │   ├── ORACLE-PLSQL-TEMPLATE.sql
 │   │   └── ORACLE-PLSQL-STANDARDS.md
-│   └── README-TEMPLATE.md
-│       DEPLOYMENT-TEMPLATE.md
+│   ├── README-TEMPLATE.md
+│   └── DEPLOYMENT-TEMPLATE.md
 └── scripts/
     └── setup/
         ├── setup-new-project.sh
@@ -118,9 +137,11 @@ See [NEW-PROJECT-CHECKLIST.md](docs/quick-reference/NEW-PROJECT-CHECKLIST.md)
 
 ## What's Automated by setup-new-project.sh
 
+✓ Creates src, tests, logs directories
 ✓ Creates Python virtual environment (.venv)
 ✓ Installs dependencies from pyproject.toml
 ✓ Copies all config templates (.vscode, .gitignore, .env.example, .editorconfig, .pre-commit-config.yaml)
+✓ Copies Python logging, config, and constants templates
 ✓ Installs and initializes pre-commit hooks
 ✓ Activates the virtual environment
 ✓ Verifies Git configuration
@@ -149,9 +170,24 @@ cp ~/dev-toolkit/templates/configs/.gitignore .
 # Pre-commit hooks
 cp ~/dev-toolkit/templates/configs/.pre-commit-config.yaml .
 pre-commit install
+
+# Python logging and config
+cp ~/dev-toolkit/templates/python/logging_config.py .
+cp ~/dev-toolkit/templates/python/audit_logging.py .
+cp ~/dev-toolkit/templates/python/config.py.snippet config.py
+cp ~/dev-toolkit/templates/python/constants.py.snippet constants.py
+# Edit config.py to set LOCAL_TZ
 ```
 
 Or use the setup script to do all this automatically.
+
+### For Logging
+
+See [LOGGING-QUICK-REFERENCE.md](docs/quick-reference/LOGGING-QUICK-REFERENCE.md) for setup and usage:
+
+- **[logging_config.py](templates/python/logging_config.py)** – Standard logging with daily file rotation, timezone support, optional JSON
+- **[config.py.snippet](templates/python/config.py.snippet)** – Add your LOCAL_TZ timezone
+- **[constants.py.snippet](templates/python/constants.py.snippet)** – Configure logging level, retention, JSON formatting
 
 ### For SQL Projects
 
@@ -186,6 +222,8 @@ Use the Oracle PL/SQL template and standards:
 - Docker (learning)
 - pre-commit (code quality)
 - Black, Ruff, mypy (Python code quality)
+- Standard logging with timezone support
+- Optional JSON logging for CloudWatch, ELK, Splunk
 
 **Focus Areas:**
 - Business Intelligence
@@ -201,6 +239,12 @@ Use the Oracle PL/SQL template and standards:
 - Pre-commit hooks run automatically
 - Fix any issues Black, Ruff, or mypy flag
 - Commit again after fixes
+
+**Logging:**
+- One-time setup: Call `setup_logging()` in your main module
+- Then use: `logger = logging.getLogger(__name__)`
+- File logs everything (DEBUG), console shows INFO and above
+- See [LOGGING-QUICK-REFERENCE.md](docs/quick-reference/LOGGING-QUICK-REFERENCE.md) for details
 
 **Terminal workflow:**
 ```bash
@@ -258,11 +302,15 @@ New projects will use the latest templates.
 **Can't find a quick reference doc**
 → All quick references are in `docs/quick-reference/`
 
+**Logging setup issues**
+→ Check [LOGGING-QUICK-REFERENCE.md](docs/quick-reference/LOGGING-QUICK-REFERENCE.md), make sure `config.py` has `LOCAL_TZ` set
+
 **Need help with a specific tool?**
 → Check the relevant quick reference:
 - Git: [GIT-GITHUB-QUICK-REFERENCE.md](docs/quick-reference/GIT-GITHUB-QUICK-REFERENCE.md)
 - VS Code: [VSCODE-QUICK-REFERENCE.md](docs/quick-reference/VSCODE-QUICK-REFERENCE.md)
 - Python: [PYTHON-PIP-PYPROJECT-QUICK-REFERENCE.md](docs/quick-reference/PYTHON-PIP-PYPROJECT-QUICK-REFERENCE.md)
+- Logging: [LOGGING-QUICK-REFERENCE.md](docs/quick-reference/LOGGING-QUICK-REFERENCE.md)
 - AWS: [AWS-CLI-QUICK-REFERENCE.md](docs/quick-reference/AWS-CLI-QUICK-REFERENCE.md)
 - DBeaver: [DBEAVER-QUICK-REFERENCE.md](docs/quick-reference/DBEAVER-QUICK-REFERENCE.md)
 
@@ -270,15 +318,17 @@ New projects will use the latest templates.
 
 ## Version & Changelog
 
-**Current Version:** 1.0
+**Current Version:** 1.1
 
 **Last Updated:** 2026-03-28
 
 **Includes:**
-- Project setup automation
+- Project setup automation (with logging templates)
 - Config templates (Black, Ruff, mypy, pre-commit, VS Code, Git)
+- Python logging templates (timezone support, optional JSON, file rotation)
+- Database audit logging skeleton (for future use)
 - SQL templates and standards (Oracle PL/SQL)
-- Quick reference guides (Git, VS Code, Python, AWS, DBeaver)
+- Quick reference guides (Git, VS Code, Python, Logging, AWS, DBeaver)
 - Project documentation templates
 
 ---
@@ -287,8 +337,9 @@ New projects will use the latest templates.
 
 1. **Bookmark the quick references** – You'll refer to them frequently
 2. **Use the setup script** for new projects
-3. **Keep this toolkit updated** as your workflow evolves
-4. **Add to your VS Code workspace** for quick access
+3. **Configure logging** in `config.py` and `constants.py` for each project
+4. **Keep this toolkit updated** as your workflow evolves
+5. **Add to your VS Code workspace** for quick access
 
 ---
 

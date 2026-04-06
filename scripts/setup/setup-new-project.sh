@@ -12,6 +12,12 @@ ENV_TEMPLATE="$TOOLKIT_DIR/templates/configs/.env.example"
 EDITORCONFIG_TEMPLATE="$TOOLKIT_DIR/templates/configs/.editorconfig"
 PRECOMMIT_CONFIG_TEMPLATE="$TOOLKIT_DIR/templates/configs/.pre-commit-config.yaml"
 
+# NEW: Python templates
+CONFIG_TEMPLATE="$TOOLKIT_DIR/templates/python/config.py.snippet"
+CONSTANTS_TEMPLATE="$TOOLKIT_DIR/templates/python/constants.py.snippet"
+LOGGING_CONFIG_TEMPLATE="$TOOLKIT_DIR/templates/python/logging_config.py"
+AUDIT_LOGGING_TEMPLATE="$TOOLKIT_DIR/templates/python/audit_logging.py"
+
 # ============================================================
 # SCRIPT
 # ============================================================
@@ -44,7 +50,13 @@ echo "=================================================="
 echo "Setting up project: $PROJECT_DIR"
 echo "=================================================="
 
-# Step 1: Check if .python-version exists
+# Step 1: Create project directories
+echo ""
+echo "Creating project directories..."
+mkdir -p src tests logs
+echo "✓ Directories created (src, tests, logs)"
+
+# Step 2: Check if .python-version exists
 if [ ! -f ".python-version" ]; then
     echo ""
     echo "⚠️  No .python-version file found"
@@ -55,20 +67,20 @@ else
     echo "✓ Using Python version: $PYTHON_VERSION"
 fi
 
-# Step 2: Create virtual environment
+# Step 3: Create virtual environment
 echo ""
 echo "Creating virtual environment..."
 python -m venv .venv
 echo "✓ Virtual environment created"
 
-# Step 3: Activate and upgrade pip
+# Step 4: Activate and upgrade pip
 echo ""
 echo "Activating .venv and upgrading pip..."
 source .venv/bin/activate
 pip install --upgrade pip > /dev/null 2>&1
 echo "✓ pip upgraded"
 
-# Step 4: Install dependencies
+# Step 5: Install dependencies
 echo ""
 echo "Installing project dependencies..."
 if [ -f "pyproject.toml" ]; then
@@ -82,13 +94,13 @@ else
     echo "Skipping dependency installation"
 fi
 
-# Step 5: Install pre-commit
+# Step 6: Install pre-commit
 echo ""
 echo "Installing pre-commit..."
 pip install pre-commit > /dev/null 2>&1
 echo "✓ pre-commit installed"
 
-# Step 6: Copy templates from toolkit
+# Step 7: Copy templates from toolkit
 echo ""
 echo "Copying templates from toolkit..."
 
@@ -149,13 +161,65 @@ else
     echo "✓ .pre-commit-config.yaml already exists (skipped)"
 fi
 
-# Step 7: Initialize pre-commit
+# NEW: Copy Python templates (logging, config, constants)
+echo ""
+echo "Copying Python templates..."
+
+# Copy config.py (only if it doesn't exist)
+if [ ! -f "config.py" ]; then
+    if [ -f "$CONFIG_TEMPLATE" ]; then
+        cp "$CONFIG_TEMPLATE" config.py
+        echo "✓ config.py copied (update LOCAL_TZ as needed)"
+    else
+        echo "⚠️  config.py template not found at: $CONFIG_TEMPLATE"
+    fi
+else
+    echo "✓ config.py already exists (skipped)"
+fi
+
+# Copy constants.py (only if it doesn't exist)
+if [ ! -f "constants.py" ]; then
+    if [ -f "$CONSTANTS_TEMPLATE" ]; then
+        cp "$CONSTANTS_TEMPLATE" constants.py
+        echo "✓ constants.py copied"
+    else
+        echo "⚠️  constants.py template not found at: $CONSTANTS_TEMPLATE"
+    fi
+else
+    echo "✓ constants.py already exists (skipped)"
+fi
+
+# Copy logging_config.py (only if it doesn't exist)
+if [ ! -f "logging_config.py" ]; then
+    if [ -f "$LOGGING_CONFIG_TEMPLATE" ]; then
+        cp "$LOGGING_CONFIG_TEMPLATE" logging_config.py
+        echo "✓ logging_config.py copied"
+    else
+        echo "⚠️  logging_config.py template not found at: $LOGGING_CONFIG_TEMPLATE"
+    fi
+else
+    echo "✓ logging_config.py already exists (skipped)"
+fi
+
+# Copy audit_logging.py (only if it doesn't exist)
+if [ ! -f "audit_logging.py" ]; then
+    if [ -f "$AUDIT_LOGGING_TEMPLATE" ]; then
+        cp "$AUDIT_LOGGING_TEMPLATE" audit_logging.py
+        echo "✓ audit_logging.py copied (for future use)"
+    else
+        echo "⚠️  audit_logging.py template not found at: $AUDIT_LOGGING_TEMPLATE"
+    fi
+else
+    echo "✓ audit_logging.py already exists (skipped)"
+fi
+
+# Step 8: Initialize pre-commit
 echo ""
 echo "Initializing pre-commit hooks..."
 pre-commit install > /dev/null 2>&1
 echo "✓ pre-commit hooks installed"
 
-# Step 8: Verify git
+# Step 9: Verify git
 echo ""
 echo "Verifying git connection..."
 git remote -v > /dev/null 2>&1
@@ -165,16 +229,18 @@ else
     echo "⚠️  Could not verify git remote"
 fi
 
-# Step 9: Summary
+# Step 10: Summary
 echo ""
 echo "=================================================="
 echo "✓ Project setup complete!"
 echo "=================================================="
 echo ""
 echo "Next steps:"
-echo "  1. code .                    (Open in VS Code)"
-echo "  2. Select Python interpreter (Cmd + Shift + P → Python: Select Interpreter)"
-echo "  3. Save as workspace         (File → Save Workspace As)"
+echo "  1. Edit config.py:     Update LOCAL_TZ to your timezone"
+echo "  2. Edit constants.py:  Customize logging if needed (optional)"
+echo "  3. code .              Open in VS Code"
+echo "  4. Select Python interpreter (Cmd + Shift + P → Python: Select Interpreter)"
+echo "  5. Save as workspace   (File → Save Workspace As)"
 echo ""
 echo "Your .venv is activated in this terminal."
 echo "Type 'deactivate' to exit when done."
