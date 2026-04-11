@@ -46,6 +46,37 @@ Cmd + \                  Split editor horizontally
 Cmd + K Cmd + Left/Right Switch editor panes
 ```
 
+## Markdown Support
+
+### Viewing Markdown as Formatted Text
+```
+Cmd + Shift + V          Open markdown preview
+Cmd + K V                Open markdown preview to the side (split view)
+```
+
+**Use case:** Great for viewing README files, documentation, or markdown notes with proper formatting, headers, bold/italic text, and links rendered.
+
+**Side-by-side workflow:**
+- Open `.md` file
+- Press `Cmd + K V` to see preview on the right
+- Edit on left, see formatted output on right in real-time
+
+### Markdown Editing Tips
+```
+Cmd + B                  Bold selected text (with extension)
+Cmd + I                  Italic selected text (with extension)
+Cmd + Shift + V          Paste as markdown (converts from clipboard)
+```
+
+**Navigation in markdown:**
+```
+Cmd + Shift + O          Jump to heading in markdown file
+```
+
+**Recommended extensions:**
+- **Markdown Preview Enhanced** – Better preview with TOC, code execution
+- **Markdownlint** – Catches markdown formatting issues
+
 ## Python-Specific Workflows
 
 ### Selecting & Using the Right Python Interpreter
@@ -286,3 +317,4 @@ Conditional breakpoints save you from stepping through hundreds of iterations to
 - **Ctrl + Grave opens a new terminal** – Useful when you need multiple terminal tabs
 - **Cmd + K clears the terminal** – Cleans up after running commands
 - **Command Palette is your friend** – If you forget a shortcut, Cmd + Shift + P and search
+- **Cmd + K V for markdown preview** – Great for viewing documentation side-by-side with editing
