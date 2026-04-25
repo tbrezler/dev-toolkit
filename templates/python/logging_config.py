@@ -1,153 +1,95 @@
 """
-Standard logging configuration for Python projects.
+Logging configuration. Call setup_logging() once at startup.
 
-Setup (call once at app startup):
-    from config import LOCAL_TZ
-    from constants import LOG_RETENTION_DAYS, LOG_LEVEL, USE_JSON_LOGGING
     from logging_config import setup_logging
-
-    setup_logging(
-        name="my_project",
-        local_tz=LOCAL_TZ,
-        level=LOG_LEVEL,
-        retention_days=LOG_RETENTION_DAYS,
-        use_json=USE_JSON_LOGGING,
-    )
+    logger = setup_logging("my_project")
 
 Then in any module:
     import logging
     logger = logging.getLogger(__name__)
-    logger.info("Something happened")
 """
 
-import json
+from __future__ import annotations
+
 import logging
 import logging.handlers
-from datetime import datetime
 from pathlib import Path
-
-import pytz
 
 
 def setup_logging(
     name: str,
-    local_tz: pytz.timezone,
-    log_dir: str = "logs",
+    log_dir: str | Path | None = "logs",
     level: str = "INFO",
     retention_days: int = 30,
-    use_json: bool = False,
-) -> None:
+) -> logging.Logger:
     """
-    Configure logging with daily file rotation and timezone support.
-
-    Should be called once at application startup (e.g., in main.py or __init__.py).
+    Configure logging with console output and optional daily file rotation.
 
     Args:
-        name: Project/logger name (e.g., "my_project")
-        local_tz: Timezone object (e.g., pytz.timezone("America/Chicago"))
-        log_dir: Directory for log files (default: "logs")
-        level: Logging level as string (default: "INFO")
-        retention_days: Number of days to keep log files (default: 30)
-        use_json: Whether to use JSON formatting for structured logging (default: False)
+        name: Logger name and log filename prefix.
+        log_dir: Directory for log files. None disables file logging
+                 (use this for Lambda / container deployments).
+        level: Console log level (file always captures DEBUG).
+        retention_days: Number of daily log files to keep.
 
-    Example:
-        from config import LOCAL_TZ
-        from constants import LOG_RETENTION_DAYS, LOG_LEVEL, USE_JSON_LOGGING
-
-        setup_logging(
-            name="my_project",
-            local_tz=LOCAL_TZ,
-            level=LOG_LEVEL,
-            retention_days=LOG_RETENTION_DAYS,
-            use_json=USE_JSON_LOGGING,
-        )
+    Returns:
+        Configured logger.
     """
-    # Create logs directory
-    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    console_level = getattr(logging, level.upper(), None)
+    if console_level is None:
+        raise ValueError(
+            f"Invalid log level: {level!r}. "
+            f"Expected one of: DEBUG, INFO, WARNING, ERROR, CRITICAL"
+        )
 
     logger = logging.getLogger(name)
-    logger.setLevel(level.upper())
 
-    # Prevent duplicate handlers if called multiple times
     if logger.handlers:
-        return
+        logger.handlers.clear()
 
-    # Choose formatter
-    if use_json:
-        formatter = JSONFormatter(local_tz=local_tz)
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False
+
+    # ── File handler (daily rotation) ────────────────────────
+    if log_dir is not None:
+        log_dir = Path(log_dir)
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        file_handler = logging.handlers.TimedRotatingFileHandler(
+            filename=log_dir / f"{name}.log",
+            when="midnight",
+            interval=1,
+            backupCount=retention_days,
+            utc=True,
+            encoding="utf-8",
+        )
+        file_handler.suffix = "%Y-%m-%d"
+        file_handler.namer = _rotated_filename
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter(
+            fmt="%(asctime)s | %(name)s:%(lineno)d - %(levelname)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        ))
+        logger.addHandler(file_handler)
     else:
-        formatter = StandardFormatter(local_tz=local_tz)
+        # No file handler to capture DEBUG, so don't create
+        # debug records just to throw them away at the console
+        logger.setLevel(console_level)
 
-    # ── File Handler (detailed, daily rotation) ──────────────
-    file_handler = logging.handlers.TimedRotatingFileHandler(
-        filename=f"{log_dir}/{name}.log",
-        when="midnight",
-        interval=1,
-        backupCount=retention_days,
-        utc=False,
-    )
-    file_handler.setLevel(logging.DEBUG)  # File captures everything
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-    # ── Console Handler (clean, concise output) ──────────────
+    # ── Console handler ──────────────────────────────────────
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)  # Console shows INFO and above
-    console_handler.setFormatter(formatter)
+    console_handler.setLevel(console_level)
+    console_handler.setFormatter(logging.Formatter(
+        fmt="%(asctime)s | %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    ))
     logger.addHandler(console_handler)
 
-
-class StandardFormatter(logging.Formatter):
-    """Standard formatter with timezone-aware timestamps."""
-
-    def __init__(self, local_tz: pytz.timezone):
-        self.local_tz = local_tz
-        super().__init__()
-
-    def format(self, record: logging.LogRecord) -> str:
-        """Format log record with local timezone."""
-        # Convert UTC timestamp to local timezone
-        dt = datetime.fromtimestamp(record.created, tz=self.local_tz)
-        record.asctime = dt.strftime("%Y-%m-%d %H:%M:%S")
-
-        # Different format for console vs file based on levelno
-        # File gets full details, console gets just level and message
-        if record.levelno >= logging.WARNING or isinstance(
-            logging.getLogger(record.name).handlers[0], logging.StreamHandler
-        ):
-            # Simpler format for console
-            fmt = "%(levelname)s: %(message)s"
-        else:
-            # Detailed format for file
-            fmt = "%(asctime)s | %(name)s:%(lineno)d - %(levelname)s: %(message)s"
-
-        formatter = logging.Formatter(fmt)
-        return formatter.format(record)
+    return logger
 
 
-class JSONFormatter(logging.Formatter):
-    """JSON formatter for structured logging (CloudWatch, log aggregation, etc.)."""
-
-    def __init__(self, local_tz: pytz.timezone):
-        self.local_tz = local_tz
-        super().__init__()
-
-    def format(self, record: logging.LogRecord) -> str:
-        """Format log record as JSON."""
-        # Convert to local timezone
-        dt = datetime.fromtimestamp(record.created, tz=self.local_tz)
-
-        log_data = {
-            "timestamp": dt.isoformat(),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
-            "module": record.module,
-            "function": record.funcName,
-            "line": record.lineno,
-        }
-
-        if record.exc_info:
-            log_data["exception"] = self.formatException(record.exc_info)
-
-        return json.dumps(log_data)
+def _rotated_filename(default_name: str) -> str:
+    """Rename rotated files: my_project.2024-01-15.log instead of my_project.log.2024-01-15."""
+    p = Path(default_name)
+    stem_path = Path(p.stem)
+    return str(p.parent / f"{stem_path.stem}{p.suffix}{stem_path.suffix}")
