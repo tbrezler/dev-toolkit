@@ -3,25 +3,7 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = [
-    "E",      # pycodestyle errors (style conventions)
-    "F",      # pyflakes (logic errors, unused imports, etc.)
-    "W",      # pycodestyle warnings
-    "I",      # isort (import sorting)
-    "UP",     # pyupgrade (suggests modern Python syntax)
-    "N",      # pep8-naming (naming conventions)
-    "C4",     # flake8-comprehensions (better list/dict/set comprehensions)
-    "BLE",    # flake8-blind-except (no bare `except:`)
-    "A",      # flake8-builtins (don't shadow builtins like `list`, `id`, etc.)
-    "B",      # flake8-bugbear (common bugs and design problems)
-    "T10",    # debugger statements (breakpoint, pdb.set_trace)
-    "T20",    # print statements (catches stray prints)
-    "SIM",    # flake8-simplify (suggests simpler constructs)
-    "PTH",    # flake8-use-pathlib (prefer pathlib over os.path)
-    "PERF",   # perflint (performance anti-patterns)
-    "RUF",    # ruff-specific rules (catches things other linters miss)
-    "PT",     # flake8-pytest-style (since you use pytest)
-]
+select = ["F", "E", "W", "B", "BLE", "I", "UP", "A", "RUF", "T10"]
 ignore = [
     "E501",   # line length (handled by ruff format)
 ]
