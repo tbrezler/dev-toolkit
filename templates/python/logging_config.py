@@ -13,12 +13,15 @@ from __future__ import annotations
 
 import logging
 import logging.handlers
+import os
 from pathlib import Path
+
+_UNSET = object()
 
 
 def setup_logging(
     name: str,
-    log_dir: str | Path | None = "logs",
+    log_dir: str | Path | None = _UNSET,
     level: str = "INFO",
     retention_days: int = 30,
 ) -> logging.Logger:
@@ -27,14 +30,27 @@ def setup_logging(
 
     Args:
         name: Logger name and log filename prefix.
-        log_dir: Directory for log files. None disables file logging
-                 (use this for Lambda / container deployments).
+        log_dir: Directory for log files (default: "logs").
+                 Automatically disabled in read-only environments
+                 (AWS Lambda, etc.).
+                 Pass None explicitly to disable file logging elsewhere.
         level: Console log level (file always captures DEBUG).
         retention_days: Number of daily log files to keep.
 
     Returns:
         Configured logger.
     """
+    # ── Resolve log_dir default ──────────────────────────────
+    # Lambda (and similar) mount code to a read-only filesystem.
+    # When the caller doesn't pass log_dir, detect this and skip
+    # file logging automatically so bare setup_logging("x") is
+    # safe everywhere.
+    if log_dir is _UNSET:
+        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            log_dir = None
+        else:
+            log_dir = "logs"
+
     console_level = getattr(logging, level.upper(), None)
     if console_level is None:
         raise ValueError(
