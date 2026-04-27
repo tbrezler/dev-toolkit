@@ -58,13 +58,12 @@ def setup_logging(
             f"Expected one of: DEBUG, INFO, WARNING, ERROR, CRITICAL"
         )
 
-    logger = logging.getLogger(name)
+    logger = logging.getLogger()
 
     if logger.handlers:
         logger.handlers.clear()
 
     logger.setLevel(logging.DEBUG)
-    logger.propagate = False
 
     # ── File handler (daily rotation) ────────────────────────
     if log_dir is not None:
