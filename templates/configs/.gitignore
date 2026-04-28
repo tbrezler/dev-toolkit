@@ -64,5 +64,6 @@ npm-debug.log
 
 # AWS CLI local config
 .aws/
+layers/
 
 # Project specific
