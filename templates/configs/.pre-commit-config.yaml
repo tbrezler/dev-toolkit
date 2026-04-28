@@ -6,6 +6,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-toml          # Validates your pyproject.toml
       - id: check-yaml
+        # args: ['--unsafe']      # ← Add this to allow custom tags (CloudFormation, etc)
       - id: debug-statements    # Prevents accidental pdb/breakpoint commits
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
