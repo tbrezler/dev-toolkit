@@ -2,11 +2,7 @@
     // ============================================================
     // PYTHON - Interpreter & Environment
     // ============================================================
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "python.terminal.activateEnvironment": true,
-    "python.analysis.extraPaths": [
-    "${workspaceFolder}/.venv/lib/python*/site-packages"
-    ],
 
     // ============================================================
     // PYTHON - Testing
